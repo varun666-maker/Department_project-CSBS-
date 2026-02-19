@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Events | CSBS Admin</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <a href="../index.html" class="nav-brand">
+                <div class="nav-brand-icon"><img src="../img/logo.png" alt="CSBS"></div>CSBS Admin
+            </a>
+            <ul class="nav-links">
+                <li><a href="../index.html">View Website</a></li>
+            </ul>
+            <div class="nav-actions">
+                <button class="theme-toggle" onclick="toggleTheme()"><i class="bi bi-moon-fill"></i></button>
+                <button class="btn btn-sm btn-danger" onclick="logout()">Logout</button>
+                <button class="nav-hamburger"
+                    onclick="toggleAdminSidebar()"><span></span><span></span><span></span></button>
+            </div>
+        </div>
+    </nav>
+    <div class="admin-layout">
+        <aside class="admin-sidebar">
+            <ul class="sidebar-menu">
+                <li><a href="dashboard.html"><span class="menu-icon"><i class="bi bi-speedometer2"></i></span>
+                        Dashboard</a></li>
+                <li><a href="manage-notices.html"><span class="menu-icon"><i class="bi bi-clipboard-check"></i></span>
+                        Notices</a></li>
+                <li><a href="manage-events.html" class="active"><span class="menu-icon"><i
+                                class="bi bi-calendar-event"></i></span> Events</a></li>
+                <li><a href="manage-faculty.html"><span class="menu-icon"><i class="bi bi-people-fill"></i></span>
+                        Faculty</a></li>
+                <li><a href="manage-students.html"><span class="menu-icon"><i class="bi bi-mortarboard-fill"></i></span>
+                        Students</a></li>
+                <li><a href="manage-achievements.html"><span class="menu-icon"><i class="bi bi-trophy-fill"></i></span>
+                        Achievements</a></li>
+            </ul>
+        </aside>
+        <main class="admin-main">
+            <div class="admin-header">
+                <h1>Manage Events</h1><button class="btn btn-primary" onclick="openAddModal('events')">+ Add
+                    Event</button>
+            </div>
+            <div class="card" style="overflow-x:auto">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Category</th>
+                            <th>Date</th>
+                            <th>Fee</th>
+                            <th>Registrations</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="events-tbody"></tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <!-- Add/Edit Event Modal -->
+    <div class="modal-overlay" id="events-modal">
+        <div class="modal" style="max-width:640px">
+            <div class="modal-header">
+                <h3>Add Event</h3><button class="modal-close" onclick="closeAdminModal('events')">✕</button>
+            </div>
+            <div class="modal-body">
+                <form id="events-form">
+                    <div class="form-group"><label>Title *</label><input type="text" class="form-control" name="title"
+                            required>
+                        <div class="form-error"></div>
+                    </div>
+                    <div class="form-group"><label>Description *</label><textarea class="form-control"
+                            name="description" required></textarea>
+                        <div class="form-error"></div>
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+                        <div class="form-group"><label>Date *</label><input type="date" class="form-control" name="date"
+                                required>
+                            <div class="form-error"></div>
+                        </div>
+                        <div class="form-group"><label>Time *</label><input type="text" class="form-control" name="time"
+                                required placeholder="e.g. 10:00 AM">
+                            <div class="form-error"></div>
+                        </div>
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+                        <div class="form-group"><label>Venue *</label><input type="text" class="form-control"
+                                name="venue" required>
+                            <div class="form-error"></div>
+                        </div>
+                        <div class="form-group"><label>Organizer</label><input type="text" class="form-control"
+                                name="organizer">
+                            <div class="form-error"></div>
+                        </div>
+                    </div>
+
+                    <hr style="border:none;border-top:1px solid var(--border);margin:1.5rem 0">
+
+                    <div class="form-group">
+                        <label>Category *</label>
+                        <select class="form-control" name="category" required onchange="onCategoryChange(this.value)">
+                            <option value="general">🌐 General</option>
+                            <option value="cultural">🎭 Cultural</option>
+                            <option value="technical">💻 Technical</option>
+                            <option value="hackathon">🚀 Hackathon</option>
+                            <option value="workshop">🔧 Workshop</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" style="display:flex;align-items:center;gap:.75rem">
+                        <input type="checkbox" id="evt-requires-reg" name="requiresRegistration"
+                            onchange="toggleRegFields(this.checked)" style="width:18px;height:18px;cursor:pointer">
+                        <label for="evt-requires-reg" style="margin:0;cursor:pointer">Requires Registration</label>
+                    </div>
+
+                    <div id="reg-fields-section" style="display:none">
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+                            <div class="form-group"><label>Entrance Fee (₹)</label>
+                                <input type="number" class="form-control" name="entranceFee" min="0" value="0"
+                                    onchange="toggleQrField(+this.value)">
+                            </div>
+                            <div class="form-group" id="qr-field-group" style="display:none">
+                                <label>Payment QR Code (PNG)</label>
+                                <input type="file" class="form-control" id="qr-file-input" accept="image/png"
+                                    onchange="handleQrUpload(this)" style="padding:.5rem">
+                                <input type="hidden" name="qrCodeUrl">
+                                <img id="qr-preview" src="" alt=""
+                                    style="display:none;max-width:120px;margin-top:.5rem;border-radius:8px;border:1px solid var(--border)">
+                            </div>
+                        </div>
+
+                        <div class="form-builder-section">
+                            <div
+                                style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem">
+                                <label style="margin:0;font-weight:700">📋 Custom Form Fields</label>
+                                <button type="button" class="btn btn-sm btn-outline" onclick="addFormField()">+ Add
+                                    Field</button>
+                            </div>
+                            <p style="font-size:.82rem;color:var(--text-muted);margin-bottom:1rem">Define the
+                                registration form fields students will fill out (Name, Email, Phone are always
+                                included).</p>
+                            <div id="form-fields-container"></div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer"><button class="btn btn-outline"
+                    onclick="closeAdminModal('events')">Cancel</button><button class="btn btn-primary"
+                    onclick="handleEventSave()">Save</button></div>
+        </div>
+    </div>
+
+    <!-- View Registrations Modal -->
+    <div class="modal-overlay" id="registrations-modal">
+        <div class="modal" style="max-width:750px">
+            <div class="modal-header">
+                <h3 id="reg-view-title">Registrations</h3>
+                <button class="modal-close" onclick="closeRegModal()">✕</button>
+            </div>
+            <div class="modal-body" id="reg-view-body"></div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeRegModal()">Close</button>
+                <button class="btn btn-success" id="export-reg-btn" onclick="exportRegistrations()"><i
+                        class="bi bi-download"></i> Export
+                    CSV</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/data.js"></script>
+    <script src="../js/app.js"></script>
+    <script src="../js/admin.js"></script>
+</body>
+
+</html>

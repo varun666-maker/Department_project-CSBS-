@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Achievements | CSBS Admin</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <a href="../index.html" class="nav-brand">
+                <div class="nav-brand-icon"><img src="../img/logo.png" alt="CSBS"></div>CSBS Admin
+            </a>
+            <ul class="nav-links">
+                <li><a href="../index.html">View Website</a></li>
+            </ul>
+            <div class="nav-actions">
+                <button class="theme-toggle" onclick="toggleTheme()"><i class="bi bi-moon-fill"></i></button>
+                <button class="btn btn-sm btn-danger" onclick="logout()">Logout</button>
+                <button class="nav-hamburger"
+                    onclick="toggleAdminSidebar()"><span></span><span></span><span></span></button>
+            </div>
+        </div>
+    </nav>
+    <div class="admin-layout">
+        <aside class="admin-sidebar">
+            <ul class="sidebar-menu">
+                <li><a href="dashboard.html"><span class="menu-icon"><i class="bi bi-speedometer2"></i></span>
+                        Dashboard</a></li>
+                <li><a href="manage-notices.html"><span class="menu-icon"><i class="bi bi-clipboard-check"></i></span>
+                        Notices</a></li>
+                <li><a href="manage-events.html"><span class="menu-icon"><i class="bi bi-calendar-event"></i></span>
+                        Events</a></li>
+                <li><a href="manage-faculty.html"><span class="menu-icon"><i class="bi bi-people-fill"></i></span>
+                        Faculty</a></li>
+                <li><a href="manage-students.html"><span class="menu-icon"><i class="bi bi-mortarboard-fill"></i></span>
+                        Students</a></li>
+                <li><a href="manage-achievements.html" class="active"><span class="menu-icon"><i
+                                class="bi bi-trophy-fill"></i></span> Achievements</a>
+                </li>
+            </ul>
+        </aside>
+        <main class="admin-main">
+            <div class="admin-header">
+                <h1>Manage Achievements</h1><button class="btn btn-primary" onclick="openAddModal('achievements')">+ Add
+                    Achievement</button>
+            </div>
+            <div class="card" style="overflow-x:auto">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Type</th>
+                            <th>Title</th>
+                            <th>Person</th>
+                            <th>Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="achievements-tbody"></tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+    <div class="modal-overlay" id="achievements-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Add Achievement</h3><button class="modal-close" onclick="closeAdminModal('achievements')">✕</button>
+            </div>
+            <div class="modal-body">
+                <form id="achievements-form">
+                    <div class="form-group"><label>Title *</label><input type="text" class="form-control" name="title"
+                            required>
+                        <div class="form-error"></div>
+                    </div>
+                    <div class="form-group"><label>Description *</label><textarea class="form-control"
+                            name="description" required></textarea>
+                        <div class="form-error"></div>
+                    </div>
+                    <div class="form-group"><label>Person / Team *</label><input type="text" class="form-control"
+                            name="person" required>
+                        <div class="form-error"></div>
+                    </div>
+                    <div class="form-group"><label>Type *</label>
+                        <select class="form-control" name="type" required>
+                            <option value="">Select</option>
+                            <option value="student">Student</option>
+                            <option value="faculty">Faculty</option>
+                            <option value="placement">Placement</option>
+                        </select>
+                        <div class="form-error"></div>
+                    </div>
+                    <div class="form-group"><label>Date *</label><input type="date" class="form-control" name="date"
+                            required>
+                        <div class="form-error"></div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer"><button class="btn btn-outline"
+                    onclick="closeAdminModal('achievements')">Cancel</button><button class="btn btn-primary"
+                    onclick="handleSave('achievements')">Save</button></div>
+        </div>
+    </div>
+    <script src="../js/data.js"></script>
+    <script src="../js/app.js"></script>
+    <script src="../js/admin.js"></script>
+</body>
+
+</html>

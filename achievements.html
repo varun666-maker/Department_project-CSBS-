@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="CSBS Department Achievements - Student, Faculty, and Placement highlights">
+    <title>Achievements | CSBS MITM</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <a href="index.html" class="nav-brand">
+                <div class="nav-brand-icon"><img src="img/logo.png" alt="CSBS"></div>CSBS MITM
+            </a>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="notices.html">Notices</a></li>
+                <li><a href="events.html">Events</a></li>
+                <li><a href="faculty.html">Faculty</a></li>
+                <li><a href="students.html">Students</a></li>
+                <li><a href="achievements.html" class="active">Achievements</a></li>
+                <li><a href="admin/login.html">Admin</a></li>
+            </ul>
+            <div class="nav-actions">
+                <button class="theme-toggle" onclick="toggleTheme()"><i class="bi bi-moon-fill"></i></button>
+                <button class="nav-hamburger"
+                    onclick="toggleMobileNav()"><span></span><span></span><span></span></button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="page-header">
+        <h1><i class="bi bi-trophy-fill"></i> Achievements</h1>
+        <p>Celebrating excellence in academics, research, and placements</p>
+    </div>
+
+    <section class="section">
+        <div class="container">
+            <div class="tabs">
+                <button class="tab-btn active" onclick="setAchievementTab('all',this)">All</button>
+                <button class="tab-btn" onclick="setAchievementTab('student',this)">Student</button>
+                <button class="tab-btn" onclick="setAchievementTab('faculty',this)">Faculty</button>
+                <button class="tab-btn" onclick="setAchievementTab('placement',this)">Placements</button>
+            </div>
+            <div id="achievements-list"></div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-bottom">
+                <p>&copy; 2026 CSBS Department, MITM. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+    <script src="js/data.js"></script>
+    <script src="js/app.js"></script>
+</body>
+
+</html>

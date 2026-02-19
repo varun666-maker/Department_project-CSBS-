@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | CSBS Admin</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <a href="../index.html" class="nav-brand">
+                <div class="nav-brand-icon"><img src="../img/logo.png" alt="CSBS"></div>CSBS Admin
+            </a>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="../index.html">View Website</a></li>
+            </ul>
+            <div class="nav-actions">
+                <button class="theme-toggle" onclick="toggleTheme()"><i class="bi bi-moon-fill"></i></button>
+                <button class="btn btn-sm btn-danger" onclick="logout()">Logout</button>
+                <button class="nav-hamburger"
+                    onclick="toggleAdminSidebar()"><span></span><span></span><span></span></button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="admin-layout">
+        <aside class="admin-sidebar">
+            <ul class="sidebar-menu">
+                <li><a href="dashboard.html" class="active"><span class="menu-icon"><i
+                                class="bi bi-speedometer2"></i></span> Dashboard</a></li>
+                <li><a href="manage-notices.html"><span class="menu-icon"><i class="bi bi-clipboard-check"></i></span>
+                        Notices</a></li>
+                <li><a href="manage-events.html"><span class="menu-icon"><i class="bi bi-calendar-event"></i></span>
+                        Events</a></li>
+                <li><a href="manage-faculty.html"><span class="menu-icon"><i class="bi bi-people-fill"></i></span>
+                        Faculty</a></li>
+                <li><a href="manage-students.html"><span class="menu-icon"><i class="bi bi-mortarboard-fill"></i></span>
+                        Students</a></li>
+                <li><a href="manage-achievements.html"><span class="menu-icon"><i class="bi bi-trophy-fill"></i></span>
+                        Achievements</a></li>
+            </ul>
+        </aside>
+        <main class="admin-main">
+            <div class="admin-header">
+                <h1>Dashboard</h1>
+                <p style="color:var(--text-secondary)">Welcome, Admin</p>
+            </div>
+            <div class="summary-cards">
+                <div class="summary-card">
+                    <div class="card-icon blue"><i class="bi bi-clipboard-check"></i></div>
+                    <div class="card-data">
+                        <h3 data-key="notices">0</h3>
+                        <p>Total Notices</p>
+                    </div>
+                </div>
+                <div class="summary-card">
+                    <div class="card-icon purple"><i class="bi bi-calendar-event"></i></div>
+                    <div class="card-data">
+                        <h3 data-key="events">0</h3>
+                        <p>Total Events</p>
+                    </div>
+                </div>
+                <div class="summary-card">
+                    <div class="card-icon green"><i class="bi bi-people-fill"></i></div>
+                    <div class="card-data">
+                        <h3 data-key="faculty">0</h3>
+                        <p>Faculty Members</p>
+                    </div>
+                </div>
+                <div class="summary-card">
+                    <div class="card-icon amber"><i class="bi bi-mortarboard-fill"></i></div>
+                    <div class="card-data">
+                        <h3 data-key="students">0</h3>
+                        <p>Students</p>
+                    </div>
+                </div>
+                <div class="summary-card">
+                    <div class="card-icon red"><i class="bi bi-trophy-fill"></i></div>
+                    <div class="card-data">
+                        <h3 data-key="achievements">0</h3>
+                        <p>Achievements</p>
+                    </div>
+                </div>
+            </div>
+            <div class="grid-2">
+                <div class="card">
+                    <h3 style="margin-bottom:1rem">Quick Actions</h3>
+                    <div style="display:flex;flex-wrap:wrap;gap:.5rem">
+                        <a href="manage-notices.html" class="btn btn-sm btn-outline">+ New Notice</a>
+                        <a href="manage-events.html" class="btn btn-sm btn-outline">+ New Event</a>
+                        <a href="manage-faculty.html" class="btn btn-sm btn-outline">+ New Faculty</a>
+                        <a href="manage-students.html" class="btn btn-sm btn-outline">+ New Student</a>
+                        <a href="manage-achievements.html" class="btn btn-sm btn-outline">+ New Achievement</a>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3 style="margin-bottom:1rem">System Info</h3>
+                    <div style="display:grid;gap:.5rem;font-size:.9rem;color:var(--text-secondary)">
+                        <p><i class="bi bi-person-fill"></i> Logged in as: <strong>Admin</strong></p>
+                        <p><i class="bi bi-calendar-check"></i> Session: Active</p>
+                        <p><i class="bi bi-globe"></i> <a href="../index.html">View Public Website <i
+                                    class="bi bi-arrow-right"></i></a></p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script src="../js/data.js"></script>
+    <script src="../js/app.js"></script>
+    <script src="../js/admin.js"></script>
+</body>
+
+</html>

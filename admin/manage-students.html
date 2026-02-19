@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Students | CSBS Admin</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <a href="../index.html" class="nav-brand">
+                <div class="nav-brand-icon"><img src="../img/logo.png" alt="CSBS"></div>CSBS Admin
+            </a>
+            <ul class="nav-links">
+                <li><a href="../index.html">View Website</a></li>
+            </ul>
+            <div class="nav-actions">
+                <button class="theme-toggle" onclick="toggleTheme()"><i class="bi bi-moon-fill"></i></button>
+                <button class="btn btn-sm btn-danger" onclick="logout()">Logout</button>
+                <button class="nav-hamburger"
+                    onclick="toggleAdminSidebar()"><span></span><span></span><span></span></button>
+            </div>
+        </div>
+    </nav>
+    <div class="admin-layout">
+        <aside class="admin-sidebar">
+            <ul class="sidebar-menu">
+                <li><a href="dashboard.html"><span class="menu-icon"><i class="bi bi-speedometer2"></i></span>
+                        Dashboard</a></li>
+                <li><a href="manage-notices.html"><span class="menu-icon"><i class="bi bi-clipboard-check"></i></span>
+                        Notices</a></li>
+                <li><a href="manage-events.html"><span class="menu-icon"><i class="bi bi-calendar-event"></i></span>
+                        Events</a></li>
+                <li><a href="manage-faculty.html"><span class="menu-icon"><i class="bi bi-people-fill"></i></span>
+                        Faculty</a></li>
+                <li><a href="manage-students.html" class="active"><span class="menu-icon"><i
+                                class="bi bi-mortarboard-fill"></i></span> Students</a></li>
+                <li><a href="manage-achievements.html"><span class="menu-icon"><i class="bi bi-trophy-fill"></i></span>
+                        Achievements</a></li>
+            </ul>
+        </aside>
+        <main class="admin-main">
+            <div class="admin-header">
+                <h1>Manage Students</h1><button class="btn btn-primary" onclick="openAddModal('students')">+ Add
+                    Student</button>
+            </div>
+            <div class="card" style="overflow-x:auto">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>USN</th>
+                            <th>Year</th>
+                            <th>Section</th>
+                            <th>CGPA</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="students-tbody"></tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+    <div class="modal-overlay" id="students-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Add Student</h3><button class="modal-close" onclick="closeAdminModal('students')">✕</button>
+            </div>
+            <div class="modal-body">
+                <form id="students-form">
+                    <div class="form-group"><label>Name *</label><input type="text" class="form-control" name="name"
+                            required>
+                        <div class="form-error"></div>
+                    </div>
+                    <div class="form-group"><label>USN *</label><input type="text" class="form-control" name="rollNo"
+                            required>
+                        <div class="form-error"></div>
+                    </div>
+                    <div class="form-group"><label>Year *</label>
+                        <select class="form-control" name="year" required>
+                            <option value="">Select</option>
+                            <option value="1">1st Year</option>
+                            <option value="2">2nd Year</option>
+                            <option value="3">3rd Year</option>
+                            <option value="4">4th Year</option>
+                        </select>
+                        <div class="form-error"></div>
+                    </div>
+                    <div class="form-group"><label>Section *</label>
+                        <select class="form-control" name="section" required>
+                            <option value="">Select</option>
+                            <option value="A">A</option>
+                            <option value="B">B</option>
+                        </select>
+                        <div class="form-error"></div>
+                    </div>
+                    <div class="form-group"><label>Email</label><input type="email" class="form-control" name="email">
+                        <div class="form-error"></div>
+                    </div>
+                    <div class="form-group"><label>CGPA</label><input type="number" class="form-control" name="cgpa"
+                            step="0.1" min="0" max="10">
+                        <div class="form-error"></div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer"><button class="btn btn-outline"
+                    onclick="closeAdminModal('students')">Cancel</button><button class="btn btn-primary"
+                    onclick="handleSave('students')">Save</button></div>
+        </div>
+    </div>
+    <script src="../js/data.js"></script>
+    <script src="../js/app.js"></script>
+    <script src="../js/admin.js"></script>
+</body>
+
+</html>
