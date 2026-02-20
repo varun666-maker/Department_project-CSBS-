@@ -1,10 +1,10 @@
 // ===== CSBS API Data Layer =====
 // Replaces localStorage with REST API calls to the backend
 
-// Auto-detect server URL — if opened via file:// protocol, use localhost:5000
-const API_BASE = (window.location.protocol === 'file:')
-  ? 'http://localhost:5000/api'
-  : '/api';
+// Auto-detect server URL — always route to backend on port 5000
+const API_BASE = (window.location.port === '5000')
+  ? '/api'
+  : 'http://localhost:5000/api';
 
 // ---------- Auth helpers ----------
 function getAuthHeaders() {
