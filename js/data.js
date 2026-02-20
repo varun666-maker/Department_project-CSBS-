@@ -3,7 +3,7 @@
 
 // Auto-detect: local dev uses relative /api, deployed frontend uses Render backend
 // ⚠️ AFTER deploying backend on Render, replace YOUR-BACKEND-NAME below with your actual Render service name
-const RENDER_BACKEND_URL = 'https://YOUR-BACKEND-NAME.onrender.com/api';
+const RENDER_BACKEND_URL = 'https://csbs-backend.onrender.com/api';
 
 const isLocalDev = ['localhost', '127.0.0.1'].includes(window.location.hostname);
 const API_BASE = isLocalDev ? '/api' : RENDER_BACKEND_URL;

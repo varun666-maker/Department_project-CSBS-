@@ -11,7 +11,7 @@ const PORT = process.env.PORT || 5000;
 // ⚠️ AFTER deploying frontend, replace YOUR-FRONTEND-NAME below with your actual Netlify/Vercel URL
 app.use(cors({
     origin: [
-        'https://YOUR-FRONTEND-NAME.netlify.app',   // Netlify
+        'https://harmonious-dango-3f09af.netlify.app',   // Netlify
         // 'https://YOUR-FRONTEND-NAME.vercel.app', // OR Vercel — uncomment if using Vercel
         'http://localhost:5000'                      // Local dev
     ],
