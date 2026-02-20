@@ -1,10 +1,12 @@
 // ===== CSBS API Data Layer =====
 // Replaces localStorage with REST API calls to the backend
 
-// Auto-detect server URL — always route to backend on port 5000
-const API_BASE = (window.location.port === '5000')
-  ? '/api'
-  : 'http://localhost:5000/api';
+// Auto-detect: local dev uses relative /api, deployed frontend uses Render backend
+// ⚠️ AFTER deploying backend on Render, replace YOUR-BACKEND-NAME below with your actual Render service name
+const RENDER_BACKEND_URL = 'https://YOUR-BACKEND-NAME.onrender.com/api';
+
+const isLocalDev = ['localhost', '127.0.0.1'].includes(window.location.hostname);
+const API_BASE = isLocalDev ? '/api' : RENDER_BACKEND_URL;
 
 // ---------- Auth helpers ----------
 function getAuthHeaders() {
