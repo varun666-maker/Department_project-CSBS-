@@ -37,12 +37,15 @@ function initScrollAnimations() {
 }
 
 // Animated counters — driven by real data
-function animateCounters() {
+async function animateCounters() {
+  const [students, faculty, events, achievements] = await Promise.all([
+    getData('students'), getData('faculty'), getData('events'), getData('achievements')
+  ]);
   const counts = {
-    'stat-students': (getData('students') || []).length,
-    'stat-faculty': (getData('faculty') || []).length,
-    'stat-events': (getData('events') || []).length,
-    'stat-achievements': (getData('achievements') || []).length
+    'stat-students': students.length,
+    'stat-faculty': faculty.length,
+    'stat-events': events.length,
+    'stat-achievements': achievements.length
   };
   Object.entries(counts).forEach(([id, target]) => {
     const el = document.getElementById(id);
@@ -70,10 +73,10 @@ function getMonthDay(dateStr) {
 }
 
 // ===== HOME PAGE =====
-function renderHomeNotices() {
+async function renderHomeNotices() {
   const container = document.getElementById('home-notices');
   if (!container) return;
-  const notices = (getData('notices') || []).slice(0, 3);
+  const notices = (await getData('notices')).slice(0, 3);
   container.innerHTML = notices.map(n => `
     <div class="card notice-card ${n.category === 'urgent' ? 'urgent' : ''} animate-in">
       <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:.5rem">
@@ -88,10 +91,10 @@ function renderHomeNotices() {
 }
 
 // ===== NOTICES PAGE =====
-function renderNotices(filter = '') {
+async function renderNotices(filter = '') {
   const container = document.getElementById('notices-list');
   if (!container) return;
-  let notices = getData('notices') || [];
+  let notices = await getData('notices');
   if (filter) notices = notices.filter(n => n.title.toLowerCase().includes(filter.toLowerCase()) || n.content.toLowerCase().includes(filter.toLowerCase()));
   if (!notices.length) { container.innerHTML = '<div class="empty-state"><div class="icon">📋</div><p>No notices found</p></div>'; return; }
   container.innerHTML = notices.map((n, i) => `
@@ -115,16 +118,16 @@ function getCategoryLabel(cat) {
   return labels[cat] || cat;
 }
 
-function renderEvents() {
+async function renderEvents() {
   const container = document.getElementById('events-list');
   if (!container) return;
-  const events = getData('events') || [];
+  const events = await getData('events');
   if (!events.length) { container.innerHTML = '<div class="empty-state"><div class="icon"><i class="bi bi-calendar-x"></i></div><p>No upcoming events</p></div>'; return; }
   container.innerHTML = events.map((e, i) => {
     const md = getMonthDay(e.date);
     const catClass = e.category || 'general';
     const feeHtml = e.entranceFee > 0 ? `<span class="event-fee-badge">₹${e.entranceFee}</span>` : (e.requiresRegistration ? '<span class="event-fee-badge free">Free</span>' : '');
-    const regBtn = e.requiresRegistration ? `<button class="btn btn-primary btn-register" onclick="openRegistrationModal(${e.id})"><i class="bi bi-pencil-square"></i> Register Now</button>` : '';
+    const regBtn = e.requiresRegistration ? `<button class="btn btn-primary btn-register" onclick="openRegistrationModal('${e.id}')"><i class="bi bi-pencil-square"></i> Register Now</button>` : '';
     return `
     <div class="card event-card animate-in" style="animation-delay:${i * 0.1}s">
       <div class="card-header">
@@ -148,8 +151,8 @@ function renderEvents() {
   initScrollAnimations();
 }
 
-function openRegistrationModal(eventId) {
-  const event = getItemById('events', eventId);
+async function openRegistrationModal(eventId) {
+  const event = await getItemById('events', eventId);
   if (!event) return;
   _currentRegEventId = eventId;
   const modal = document.getElementById('registration-modal');
@@ -216,10 +219,10 @@ function openRegistrationModal(eventId) {
   modal.classList.add('active');
 }
 
-function submitRegistration() {
+async function submitRegistration() {
   const form = document.getElementById('reg-dynamic-form');
   if (!form || !_currentRegEventId) return;
-  const event = getItemById('events', _currentRegEventId);
+  const event = await getItemById('events', _currentRegEventId);
   if (!event) return;
 
   // Clear previous errors
@@ -265,15 +268,15 @@ function submitRegistration() {
 
   if (!valid) return;
 
-  // Save registration
-  const regs = getData('registrations') || [];
-  data.id = regs.length ? Math.max(...regs.map(r => r.id)) + 1 : 1;
-  regs.push(data);
-  setData('registrations', regs);
-
-  showToast('🎉 Registration successful! You are registered for ' + event.title, 'success');
-  closeModal('registration-modal');
-  _currentRegEventId = null;
+  // Save registration via API
+  const result = await addRegistration(data);
+  if (result) {
+    showToast('🎉 Registration successful! You are registered for ' + event.title, 'success');
+    closeModal('registration-modal');
+    _currentRegEventId = null;
+  } else {
+    showToast('Registration failed. Please try again.', 'error');
+  }
 }
 
 function showFieldError(input, msg) {
@@ -283,12 +286,12 @@ function showFieldError(input, msg) {
 }
 
 // ===== FACULTY PAGE =====
-function renderFaculty() {
+async function renderFaculty() {
   const container = document.getElementById('faculty-list');
   if (!container) return;
-  const faculty = getData('faculty') || [];
+  const faculty = await getData('faculty');
   container.innerHTML = faculty.map((f, i) => `
-    <div class="card faculty-card animate-in" style="animation-delay:${i * 0.1}s;cursor:pointer" onclick="showFacultyDetail(${f.id})">
+    <div class="card faculty-card animate-in" style="animation-delay:${i * 0.1}s;cursor:pointer" onclick="showFacultyDetail('${f.id}')">
       <div class="faculty-avatar">${f.name.split(' ').map(w => w[0]).join('').substring(0, 2)}</div>
       <h3 class="faculty-name">${f.name}</h3>
       <p class="faculty-designation">${f.designation}</p>
@@ -298,8 +301,8 @@ function renderFaculty() {
   initScrollAnimations();
 }
 
-function showFacultyDetail(id) {
-  const f = getItemById('faculty', id);
+async function showFacultyDetail(id) {
+  const f = await getItemById('faculty', id);
   if (!f) return;
   const modal = document.getElementById('faculty-modal');
   document.getElementById('faculty-detail').innerHTML = `
@@ -323,10 +326,10 @@ function closeModal(id) {
 }
 
 // ===== STUDENTS PAGE =====
-function renderStudents(year = 0, filter = '') {
+async function renderStudents(year = 0, filter = '') {
   const container = document.getElementById('students-list');
   if (!container) return;
-  let students = getData('students') || [];
+  let students = await getData('students');
   if (year > 0) students = students.filter(s => +s.year === year);
   if (filter) students = students.filter(s => s.name.toLowerCase().includes(filter.toLowerCase()) || s.rollNo.toLowerCase().includes(filter.toLowerCase()));
   if (!students.length) { container.innerHTML = '<div class="empty-state"><div class="icon">🎓</div><p>No students found</p></div>'; return; }
@@ -351,10 +354,10 @@ function setStudentYear(year, btn) {
 }
 
 // ===== ACHIEVEMENTS PAGE =====
-function renderAchievements(type = 'all') {
+async function renderAchievements(type = 'all') {
   const container = document.getElementById('achievements-list');
   if (!container) return;
-  let items = getData('achievements') || [];
+  let items = await getData('achievements');
   if (type !== 'all') items = items.filter(a => a.type === type);
   if (!items.length) { container.innerHTML = '<div class="empty-state"><div class="icon">🏆</div><p>No achievements found</p></div>'; return; }
   container.innerHTML = '<div class="grid-2">' + items.map((a, i) => `
@@ -390,14 +393,14 @@ function showToast(message, type = 'info') {
 }
 
 // ===== Init =====
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   initTheme();
   initScrollAnimations();
   // Page-specific
-  if (document.getElementById('home-notices')) { renderHomeNotices(); animateCounters(); }
-  if (document.getElementById('notices-list')) renderNotices();
-  if (document.getElementById('events-list')) renderEvents();
-  if (document.getElementById('faculty-list')) renderFaculty();
-  if (document.getElementById('students-list')) renderStudents();
-  if (document.getElementById('achievements-list')) renderAchievements();
+  if (document.getElementById('home-notices')) { await renderHomeNotices(); await animateCounters(); }
+  if (document.getElementById('notices-list')) await renderNotices();
+  if (document.getElementById('events-list')) await renderEvents();
+  if (document.getElementById('faculty-list')) await renderFaculty();
+  if (document.getElementById('students-list')) await renderStudents();
+  if (document.getElementById('achievements-list')) await renderAchievements();
 });

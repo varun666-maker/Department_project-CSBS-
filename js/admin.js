@@ -7,18 +7,18 @@ function checkAuth() {
     }
 }
 
-function handleLogin(e) {
+async function handleLogin(e) {
     e.preventDefault();
     const user = document.getElementById('username').value.trim();
     const pass = document.getElementById('password').value.trim();
     const err = document.getElementById('login-error');
 
     if (!user || !pass) { err.textContent = 'Please fill in all fields'; err.classList.add('show'); return; }
-    if (user === 'admin' && pass === 'admin123') {
-        sessionStorage.setItem('csbs_admin_logged_in', 'true');
+    try {
+        await loginAdmin(user, pass);
         window.location.href = 'dashboard.html';
-    } else {
-        err.textContent = 'Invalid username or password';
+    } catch (error) {
+        err.textContent = error.message || 'Invalid username or password';
         err.classList.add('show');
         document.getElementById('password').value = '';
     }
@@ -26,12 +26,16 @@ function handleLogin(e) {
 
 function logout() {
     sessionStorage.removeItem('csbs_admin_logged_in');
+    sessionStorage.removeItem('csbs_admin_token');
     window.location.href = 'login.html';
 }
 
 // Dashboard
-function renderDashboard() {
-    const counts = { notices: (getData('notices') || []).length, events: (getData('events') || []).length, faculty: (getData('faculty') || []).length, students: (getData('students') || []).length, achievements: (getData('achievements') || []).length };
+async function renderDashboard() {
+    const [notices, events, faculty, students, achievements] = await Promise.all([
+        getData('notices'), getData('events'), getData('faculty'), getData('students'), getData('achievements')
+    ]);
+    const counts = { notices: notices.length, events: events.length, faculty: faculty.length, students: students.length, achievements: achievements.length };
     document.querySelectorAll('.summary-card .card-data h3').forEach(el => {
         const key = el.dataset.key;
         if (key && counts[key] !== undefined) el.textContent = counts[key];
@@ -52,10 +56,10 @@ function openAddModal(entity) {
     modal.classList.add('active');
 }
 
-function openEditModal(entity, id) {
+async function openEditModal(entity, id) {
     editingId = id;
     currentEntity = entity;
-    const item = getItemById(entity, id);
+    const item = await getItemById(entity, id);
     if (!item) return;
     const modal = document.getElementById(entity + '-modal');
     modal.querySelector('.modal-header h3').textContent = 'Edit ' + capitalize(entity.replace(/s$/, ''));
@@ -73,7 +77,7 @@ function closeAdminModal(entity) {
     editingId = null;
 }
 
-function handleSave(entity) {
+async function handleSave(entity) {
     const form = document.getElementById(entity + '-form');
     const inputs = form.querySelectorAll('[name]');
     const data = {};
@@ -96,26 +100,26 @@ function handleSave(entity) {
     if (!valid) return;
 
     if (editingId) {
-        updateItem(entity, editingId, data);
+        await updateItem(entity, editingId, data);
         showToast(capitalize(entity.replace(/s$/, '')) + ' updated successfully!', 'success');
     } else {
-        addItem(entity, data);
+        await addItem(entity, data);
         showToast(capitalize(entity.replace(/s$/, '')) + ' added successfully!', 'success');
     }
     closeAdminModal(entity);
-    renderAdminTable(entity);
+    await renderAdminTable(entity);
 }
 
-function handleDelete(entity, id) {
+async function handleDelete(entity, id) {
     if (!confirm('Are you sure you want to delete this item?')) return;
-    deleteItem(entity, id);
+    await deleteItem(entity, id);
     showToast('Item deleted successfully', 'success');
-    renderAdminTable(entity);
+    await renderAdminTable(entity);
 }
 
 // ===== Admin Table Renderers =====
-function renderAdminTable(entity) {
-    const items = getData(entity) || [];
+async function renderAdminTable(entity) {
+    const items = await getData(entity);
     const tbody = document.getElementById(entity + '-tbody');
     if (!tbody) return;
 
@@ -132,13 +136,14 @@ function renderAdminTable(entity) {
         <td>${formatDate(n.date)}</td>
         <td>${n.author || '-'}</td>
         <td class="table-actions">
-          <button class="btn btn-sm btn-outline" onclick="openEditModal('notices',${n.id})"><i class="bi bi-pencil"></i></button>
-          <button class="btn btn-sm btn-danger" onclick="handleDelete('notices',${n.id})"><i class="bi bi-trash"></i></button>
+          <button class="btn btn-sm btn-outline" onclick="openEditModal('notices','${n.id}')"><i class="bi bi-pencil"></i></button>
+          <button class="btn btn-sm btn-danger" onclick="handleDelete('notices','${n.id}')"><i class="bi bi-trash"></i></button>
         </td></tr>`).join('');
             break;
         case 'events':
+            const regs = await getRegistrations();
             tbody.innerHTML = items.map(e => {
-                const regCount = (getData('registrations') || []).filter(r => r.eventId === e.id).length;
+                const regCount = regs.filter(r => r.eventId === e.id).length;
                 const catLabels = { general: '<i class="bi bi-globe"></i> General', cultural: '<i class="bi bi-palette-fill"></i> Cultural', technical: '<i class="bi bi-laptop"></i> Technical', hackathon: '<i class="bi bi-rocket-takeoff"></i> Hackathon', workshop: '<i class="bi bi-wrench"></i> Workshop' };
                 const feeText = e.requiresRegistration ? (e.entranceFee > 0 ? `₹${e.entranceFee}` : 'Free') : '—';
                 return `<tr>
@@ -146,10 +151,10 @@ function renderAdminTable(entity) {
         <td><span class="event-category-badge ${e.category || 'general'}">${catLabels[e.category] || e.category}</span></td>
         <td>${formatDate(e.date)}</td>
         <td>${feeText}</td>
-        <td>${e.requiresRegistration ? `<a href="#" onclick="viewRegistrations(${e.id});return false" style="color:var(--primary);font-weight:600">${regCount} registered</a>` : '<span style="color:var(--text-muted)">N/A</span>'}</td>
+        <td>${e.requiresRegistration ? `<a href="#" onclick="viewRegistrations('${e.id}');return false" style="color:var(--primary);font-weight:600">${regCount} registered</a>` : '<span style="color:var(--text-muted)">N/A</span>'}</td>
         <td class="table-actions">
-          <button class="btn btn-sm btn-outline" onclick="openEditModal('events',${e.id})"><i class="bi bi-pencil"></i></button>
-          <button class="btn btn-sm btn-danger" onclick="handleDelete('events',${e.id})"><i class="bi bi-trash"></i></button>
+          <button class="btn btn-sm btn-outline" onclick="openEditModal('events','${e.id}')"><i class="bi bi-pencil"></i></button>
+          <button class="btn btn-sm btn-danger" onclick="handleDelete('events','${e.id}')"><i class="bi bi-trash"></i></button>
         </td></tr>`;
             }).join('');
             break;
@@ -160,8 +165,8 @@ function renderAdminTable(entity) {
         <td>${f.specialization}</td>
         <td>${f.experience}</td>
         <td class="table-actions">
-          <button class="btn btn-sm btn-outline" onclick="openEditModal('faculty',${f.id})"><i class="bi bi-pencil"></i></button>
-          <button class="btn btn-sm btn-danger" onclick="handleDelete('faculty',${f.id})"><i class="bi bi-trash"></i></button>
+          <button class="btn btn-sm btn-outline" onclick="openEditModal('faculty','${f.id}')"><i class="bi bi-pencil"></i></button>
+          <button class="btn btn-sm btn-danger" onclick="handleDelete('faculty','${f.id}')"><i class="bi bi-trash"></i></button>
         </td></tr>`).join('');
             break;
         case 'students':
@@ -172,8 +177,8 @@ function renderAdminTable(entity) {
         <td>${s.section}</td>
         <td>${s.cgpa}</td>
         <td class="table-actions">
-          <button class="btn btn-sm btn-outline" onclick="openEditModal('students',${s.id})"><i class="bi bi-pencil"></i></button>
-          <button class="btn btn-sm btn-danger" onclick="handleDelete('students',${s.id})"><i class="bi bi-trash"></i></button>
+          <button class="btn btn-sm btn-outline" onclick="openEditModal('students','${s.id}')"><i class="bi bi-pencil"></i></button>
+          <button class="btn btn-sm btn-danger" onclick="handleDelete('students','${s.id}')"><i class="bi bi-trash"></i></button>
         </td></tr>`).join('');
             break;
         case 'achievements':
@@ -183,8 +188,8 @@ function renderAdminTable(entity) {
         <td>${a.person}</td>
         <td>${formatDate(a.date)}</td>
         <td class="table-actions">
-          <button class="btn btn-sm btn-outline" onclick="openEditModal('achievements',${a.id})"><i class="bi bi-pencil"></i></button>
-          <button class="btn btn-sm btn-danger" onclick="handleDelete('achievements',${a.id})"><i class="bi bi-trash"></i></button>
+          <button class="btn btn-sm btn-outline" onclick="openEditModal('achievements','${a.id}')"><i class="bi bi-pencil"></i></button>
+          <button class="btn btn-sm btn-danger" onclick="handleDelete('achievements','${a.id}')"><i class="bi bi-trash"></i></button>
         </td></tr>`).join('');
             break;
     }
@@ -267,7 +272,7 @@ function renderFormFields() {
     `).join('');
 }
 
-function handleEventSave() {
+async function handleEventSave() {
     const form = document.getElementById('events-form');
     const inputs = form.querySelectorAll('[name]');
     const data = {};
@@ -298,23 +303,23 @@ function handleEventSave() {
     data.formFields = data.requiresRegistration ? _adminFormFields.filter(f => f.label.trim()) : [];
 
     if (editingId) {
-        updateItem('events', editingId, data);
+        await updateItem('events', editingId, data);
         showToast('Event updated successfully!', 'success');
     } else {
-        addItem('events', data);
+        await addItem('events', data);
         showToast('Event added successfully!', 'success');
     }
     closeAdminModal('events');
-    renderAdminTable('events');
+    await renderAdminTable('events');
 }
 
 // Override openEditModal for events to handle new fields
 const _originalOpenEditModal = openEditModal;
-openEditModal = function (entity, id) {
+openEditModal = async function (entity, id) {
     if (entity === 'events') {
         editingId = id;
         currentEntity = entity;
-        const item = getItemById(entity, id);
+        const item = await getItemById(entity, id);
         if (!item) return;
         const modal = document.getElementById('events-modal');
         modal.querySelector('.modal-header h3').textContent = 'Edit Event';
@@ -349,7 +354,7 @@ openEditModal = function (entity, id) {
 
         modal.classList.add('active');
     } else {
-        _originalOpenEditModal(entity, id);
+        await _originalOpenEditModal(entity, id);
     }
 };
 
@@ -380,11 +385,11 @@ openAddModal = function (entity) {
 // ===== View Registrations =====
 let _viewingEventId = null;
 
-function viewRegistrations(eventId) {
+async function viewRegistrations(eventId) {
     _viewingEventId = eventId;
-    const event = getItemById('events', eventId);
+    const event = await getItemById('events', eventId);
     if (!event) return;
-    const regs = (getData('registrations') || []).filter(r => r.eventId === eventId);
+    const regs = await getRegistrations(eventId);
     const modal = document.getElementById('registrations-modal');
     document.getElementById('reg-view-title').textContent = 'Registrations: ' + event.title;
 
@@ -401,7 +406,7 @@ function viewRegistrations(eventId) {
             tableHtml += `<tr><td>${i + 1}</td><td>${r.fullName}</td><td>${r.usn || '—'}</td><td>${r.email}</td><td>${r.phone}</td>`;
             customCols.forEach(c => tableHtml += `<td>${(r.customFields && r.customFields[c]) || '—'}</td>`);
             tableHtml += `<td>${formatDate(r.registeredAt)}</td>`;
-            tableHtml += `<td><button class="btn btn-sm btn-danger" onclick="deleteRegistration(${r.id})"><i class="bi bi-trash"></i></button></td></tr>`;
+            tableHtml += `<td><button class="btn btn-sm btn-danger" onclick="deleteRegistration('${r.id}')"><i class="bi bi-trash"></i></button></td></tr>`;
         });
         tableHtml += '</tbody></table></div>';
         tableHtml += `<p style="margin-top:1rem;font-size:.85rem;color:var(--text-muted)">Total: <strong>${regs.length}</strong> registration(s)</p>`;
@@ -415,20 +420,18 @@ function closeRegModal() {
     _viewingEventId = null;
 }
 
-function deleteRegistration(regId) {
+async function deleteRegistration(regId) {
     if (!confirm('Delete this registration?')) return;
-    let regs = getData('registrations') || [];
-    regs = regs.filter(r => r.id !== regId);
-    setData('registrations', regs);
+    await deleteRegistrationApi(regId);
     showToast('Registration deleted', 'success');
-    if (_viewingEventId) viewRegistrations(_viewingEventId);
-    renderAdminTable('events');
+    if (_viewingEventId) await viewRegistrations(_viewingEventId);
+    await renderAdminTable('events');
 }
 
-function exportRegistrations() {
+async function exportRegistrations() {
     if (!_viewingEventId) return;
-    const event = getItemById('events', _viewingEventId);
-    const regs = (getData('registrations') || []).filter(r => r.eventId === _viewingEventId);
+    const event = await getItemById('events', _viewingEventId);
+    const regs = await getRegistrations(_viewingEventId);
     if (!regs.length) { showToast('No registrations to export', 'error'); return; }
 
     const customCols = (event.formFields || []).map(f => f.label);
@@ -455,16 +458,16 @@ function toggleAdminSidebar() {
 }
 
 // Init Admin
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     initTheme();
     // Check auth on all admin pages except login
     if (!window.location.pathname.includes('login')) checkAuth();
-    if (document.getElementById('notices-tbody')) renderAdminTable('notices');
-    if (document.getElementById('events-tbody')) renderAdminTable('events');
-    if (document.getElementById('faculty-tbody')) renderAdminTable('faculty');
-    if (document.getElementById('students-tbody')) renderAdminTable('students');
-    if (document.getElementById('achievements-tbody')) renderAdminTable('achievements');
-    if (document.querySelector('.summary-card')) renderDashboard();
+    if (document.getElementById('notices-tbody')) await renderAdminTable('notices');
+    if (document.getElementById('events-tbody')) await renderAdminTable('events');
+    if (document.getElementById('faculty-tbody')) await renderAdminTable('faculty');
+    if (document.getElementById('students-tbody')) await renderAdminTable('students');
+    if (document.getElementById('achievements-tbody')) await renderAdminTable('achievements');
+    if (document.querySelector('.summary-card')) await renderDashboard();
     // Init form builder if on events page
     if (document.getElementById('form-fields-container')) renderFormFields();
 });
