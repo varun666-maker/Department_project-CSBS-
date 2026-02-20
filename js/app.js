@@ -96,12 +96,12 @@ async function renderNotices(filter = '') {
   if (!container) return;
   let notices = await getData('notices');
   if (filter) notices = notices.filter(n => n.title.toLowerCase().includes(filter.toLowerCase()) || n.content.toLowerCase().includes(filter.toLowerCase()));
-  if (!notices.length) { container.innerHTML = '<div class="empty-state"><div class="icon">📋</div><p>No notices found</p></div>'; return; }
+  if (!notices.length) { container.innerHTML = '<div class="empty-state"><div class="icon"><i class="bi bi-clipboard-x"></i></div><p>No notices found</p></div>'; return; }
   container.innerHTML = notices.map((n, i) => `
     <div class="card notice-card ${n.category === 'urgent' ? 'urgent' : ''} animate-in" style="animation-delay:${i * 0.1}s">
       <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:.75rem;flex-wrap:wrap;gap:.5rem">
         <span class="notice-badge ${n.category}">${n.category}</span>
-        <span class="notice-date">📅 ${formatDate(n.date)} &nbsp;|&nbsp; ✍️ ${n.author || 'Admin'}</span>
+        <span class="notice-date"><i class="bi bi-calendar3"></i> ${formatDate(n.date)} &nbsp;|&nbsp; <i class="bi bi-person-fill"></i> ${n.author || 'Admin'}</span>
       </div>
       <h3>${n.title}</h3>
       <p style="margin-top:.5rem">${n.content}</p>
@@ -271,7 +271,7 @@ async function submitRegistration() {
   // Save registration via API
   const result = await addRegistration(data);
   if (result) {
-    showToast('🎉 Registration successful! You are registered for ' + event.title, 'success');
+    showToast('Registration successful! You are registered for ' + event.title, 'success');
     closeModal('registration-modal');
     _currentRegEventId = null;
   } else {
@@ -332,7 +332,7 @@ async function renderStudents(year = 0, filter = '') {
   let students = await getData('students');
   if (year > 0) students = students.filter(s => +s.year === year);
   if (filter) students = students.filter(s => s.name.toLowerCase().includes(filter.toLowerCase()) || s.rollNo.toLowerCase().includes(filter.toLowerCase()));
-  if (!students.length) { container.innerHTML = '<div class="empty-state"><div class="icon">🎓</div><p>No students found</p></div>'; return; }
+  if (!students.length) { container.innerHTML = '<div class="empty-state"><div class="icon"><i class="bi bi-mortarboard"></i></div><p>No students found</p></div>'; return; }
   container.innerHTML = '<div class="grid-3">' + students.map((s, i) => `
     <div class="card student-card animate-in" style="animation-delay:${i * 0.05}s">
       <div class="student-avatar">${s.name.split(' ').map(w => w[0]).join('').substring(0, 2)}</div>
@@ -359,15 +359,15 @@ async function renderAchievements(type = 'all') {
   if (!container) return;
   let items = await getData('achievements');
   if (type !== 'all') items = items.filter(a => a.type === type);
-  if (!items.length) { container.innerHTML = '<div class="empty-state"><div class="icon">🏆</div><p>No achievements found</p></div>'; return; }
+  if (!items.length) { container.innerHTML = '<div class="empty-state"><div class="icon"><i class="bi bi-trophy"></i></div><p>No achievements found</p></div>'; return; }
   container.innerHTML = '<div class="grid-2">' + items.map((a, i) => `
     <div class="card achievement-card animate-in" style="animation-delay:${i * 0.1}s">
       <span class="achievement-type">${a.type}</span>
       <h3 style="margin-bottom:.5rem">${a.title}</h3>
       <p>${a.description}</p>
       <div style="margin-top:.75rem;display:flex;justify-content:space-between;font-size:.82rem;color:var(--text-muted)">
-        <span>👤 ${a.person}</span>
-        <span>📅 ${formatDate(a.date)}</span>
+        <span><i class="bi bi-person-fill"></i> ${a.person}</span>
+        <span><i class="bi bi-calendar3"></i> ${formatDate(a.date)}</span>
       </div>
     </div>
   `).join('') + '</div>';
@@ -384,7 +384,7 @@ function setAchievementTab(type, btn) {
 function showToast(message, type = 'info') {
   let container = document.querySelector('.toast-container');
   if (!container) { container = document.createElement('div'); container.className = 'toast-container'; document.body.appendChild(container); }
-  const icons = { success: '✅', error: '❌', info: 'ℹ️' };
+  const icons = { success: '<i class="bi bi-check-circle-fill"></i>', error: '<i class="bi bi-x-circle-fill"></i>', info: '<i class="bi bi-info-circle-fill"></i>' };
   const toast = document.createElement('div');
   toast.className = `toast ${type}`;
   toast.innerHTML = `<span>${icons[type] || ''}</span><span>${message}</span>`;
