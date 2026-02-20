@@ -172,6 +172,11 @@ Department_project-CSBS-/
 | `DELETE` | `/api/registrations/:id` | JWT | Delete registration |
 
 ---
+Deployment 
+
+You can also view our Project
+
+https://harmonious-dango-3f09af.netlify.app/
 
 ## 📄 License
 
